@@ -1,46 +1,32 @@
 import SwiftUI
 
 struct InfoView: View {
-    @State private var animateCards = false
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
         NavigationView {
             ZStack {
-                // Enhanced animated background
                 AnimatedBackgroundView()
                     .ignoresSafeArea()
                 
                 ScrollView {
-                    LazyVStack(spacing: 20) {
-                        // Header
-                        VStack(spacing: 12) {
-                            Image(systemName: "wave.3.right.circle.fill")
-                                .font(.system(size: 50))
-                                .foregroundStyle(
-                                    LinearGradient(
-                                        colors: [.cyan, .blue],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    )
-                                )
-                            
-                            Text("Electromagnetic Spectrum")
-                                .font(.system(size: 28, weight: .bold, design: .rounded))
-                                .foregroundStyle(.white)
-                                .multilineTextAlignment(.center)
-                        }
-                        .padding(.top, 20)
-                        .opacity(animateCards ? 1 : 0)
+                    VStack(spacing: 20) {
+                        Image(systemName: "wave.3.right.circle")
+                            .font(.system(size: 50))
+                            .foregroundColor(.white)
                         
-                        // Simplified Info Cards
-                        LazyVStack(spacing: 16) {
+                        Text("Electromagnetic Spectrum")
+                            .font(.system(size: 24, weight: .semibold))
+                            .foregroundColor(.white)
+                            .multilineTextAlignment(.center)
+                        
+                        VStack(spacing: 16) {
                             InfoCardView(
                                 icon: "lightbulb.fill",
                                 title: "What is EM Spectrum?",
                                 description: "The range of all electromagnetic radiation from radio waves to gamma rays.",
                                 color: .orange,
-                                delay: 0.1
+                                delay: 0
                             )
                             
                             InfoCardView(
@@ -48,7 +34,7 @@ struct InfoView: View {
                                 title: "Visible Light",
                                 description: "Only 0.0035% of the EM spectrum is visible to human eyes!",
                                 color: .green,
-                                delay: 0.2
+                                delay: 0
                             )
                             
                             InfoCardView(
@@ -56,13 +42,14 @@ struct InfoView: View {
                                 title: "Interactive Learning",
                                 description: "Tap spectrum bands to explore and watch visualizations!",
                                 color: .cyan,
-                                delay: 0.3
+                                delay: 0
                             )
                         }
                         .padding(.horizontal, 20)
                         
                         Spacer(minLength: 30)
                     }
+                    .padding(.top, 20)
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
@@ -71,13 +58,8 @@ struct InfoView: View {
                     Button("Close") {
                         dismiss()
                     }
-                    .foregroundStyle(.white)
+                    .foregroundColor(.white)
                 }
-            }
-        }
-        .onAppear {
-            withAnimation(.easeInOut(duration: 0.6)) {
-                animateCards = true
             }
         }
     }
