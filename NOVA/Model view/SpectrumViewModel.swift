@@ -8,6 +8,7 @@ class SpectrumViewModel: ObservableObject {
     @Published var showingInfo = false
     @Published var animateWaves = false
     @Published var glowIntensity = 0.0
+    @Published var showingARView = false
     
     // MARK: - Constants
     let bands = SpectrumBand.sampleBands
@@ -33,6 +34,11 @@ class SpectrumViewModel: ObservableObject {
     func toggleWaveAnimation() {
         HapticFeedback.light()
         animateWaves.toggle()
+    }
+    
+    func toggleARView() {
+        HapticFeedback.light()
+        showingARView.toggle()
     }
     
     func startInitialAnimations() {

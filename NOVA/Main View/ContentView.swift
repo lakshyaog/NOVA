@@ -13,7 +13,8 @@ struct ContentView: View {
                     LazyVStack(spacing: 16) {
                         MainHeaderView(
                             showingInfo: $viewModel.showingInfo,
-                            onInfoTap: viewModel.toggleInfo
+                            onInfoTap: viewModel.toggleInfo,
+                            onARTap: viewModel.toggleARView
                         )
                         .padding(.top, geometry.safeAreaInsets.top > 0 ? 10 : 20)
                         
@@ -52,6 +53,9 @@ struct ContentView: View {
         }
         .sheet(isPresented: $viewModel.showingInfo) {
             InfoView()
+        }
+        .fullScreenCover(isPresented: $viewModel.showingARView) {
+            ARSpectrumView(selectedBand: viewModel.selectedBand)
         }
     }
 }
