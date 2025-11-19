@@ -12,9 +12,9 @@ struct MainHeaderView: View {
                     .font(.system(size: 28, weight: .semibold))
                     .foregroundColor(.white)
                 
-                Text("Explore the invisible")
-                    .font(.system(size: 13))
-                    .foregroundColor(.gray)
+                Text("Explore the Electromagnetic Spectrum")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(.secondary)
             }
             
             Spacer()
@@ -25,8 +25,8 @@ struct MainHeaderView: View {
                         HapticFeedback.light()
                         onARTap()
                     } label: {
-                        Image(systemName: "camera.fill")
-                            .font(.system(size: 22))
+                        Image(systemName: "arkit")
+                            .font(.system(size: 24, weight: .semibold))
                             .foregroundColor(.white)
                     }
                 }
@@ -35,9 +35,9 @@ struct MainHeaderView: View {
                     HapticFeedback.light()
                     onInfoTap()
                 } label: {
-                    Image(systemName: showingInfo ? "info.circle.fill" : "info.circle")
-                        .font(.system(size: 22))
-                        .foregroundColor(.white)
+                    Image(systemName: "info.circle")
+                        .font(.system(size: 24, weight: .semibold))
+                        .foregroundColor(.primary)
                 }
             }
         }

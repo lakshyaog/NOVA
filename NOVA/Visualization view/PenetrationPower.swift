@@ -14,7 +14,7 @@ struct PenetrationPower: View {
     var body: some View {
         VStack(spacing: 12) {
             Text("Penetration Power")
-                .font(.system(size: 16, weight: .medium))
+                .font(.system(size: 18, weight: .semibold))
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity, alignment: .leading)
             
@@ -29,8 +29,8 @@ struct PenetrationPower: View {
                                 .opacity(canPenetrate ? 1.0 : 0.3)
                             
                             Text(material.0)
-                                .font(.system(size: 9))
-                                .foregroundColor(canPenetrate ? .white : .gray)
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundColor(.white)
                         }
                         .frame(maxWidth: .infinity)
                     }

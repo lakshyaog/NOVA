@@ -12,16 +12,13 @@ struct SpectrumBandView: View {
                 .frame(width: isSelected ? 60 : 50, height: isSelected ? 60 : 50)
                 .overlay(
                     Image(systemName: band.icon)
-                        .font(.system(size: isSelected ? 22 : 18))
+                        .font(.system(size: isSelected ? 24 : 20, weight: .semibold))
                         .foregroundColor(.white)
                 )
             
-            Text(band.name)
-                .font(.system(size: 11, weight: .medium))
-                .foregroundColor(isSelected ? .white : .gray)
-                .lineLimit(2)
-                .multilineTextAlignment(.center)
-                .frame(maxWidth: 70)
+            Text(band.wavelength)
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundColor(.white.opacity(0.7))
         }
         .frame(minWidth: 80, minHeight: 100)
         .contentShape(Rectangle())

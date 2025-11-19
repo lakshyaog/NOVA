@@ -10,8 +10,8 @@ struct WaveVisualizerView: View {
     var body: some View {
         VStack(spacing: 12) {
             HStack {
-                Text(selectedBand?.name ?? "No Signal")
-                    .font(.system(size: 16, weight: .medium))
+                Text("Wave Visualization")
+                    .font(.system(size: 18, weight: .semibold))
                     .foregroundColor(.white)
                 
                 Spacer()
@@ -107,7 +107,7 @@ struct WaveVisualizerView: View {
 
 // MARK: - SpectrumBand Extension
 extension SpectrumBand {
-    var WaveFrequency: Double {
+    var waveFrequency: Double {
         switch name {
         case "Radio Waves": return 0.4
         case "Microwaves": return 0.6

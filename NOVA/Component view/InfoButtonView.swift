@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct InfoButtonView: View {
+    let icon: String
+    
     @State private var rotation = 0.0
     @State private var pulse = false
     
@@ -23,9 +25,9 @@ struct InfoButtonView: View {
                 .fill(.ultraThinMaterial)
                 .frame(width: 40, height: 40)
                 .overlay(
-                    Image(systemName: "info.circle.fill")
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundStyle(.white)
+                    Image(systemName: icon)
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundColor(.primary)
                 )
         }
         .shadow(color: .cyan.opacity(0.3), radius: 8)

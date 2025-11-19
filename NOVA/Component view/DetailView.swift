@@ -7,7 +7,7 @@ struct DetailView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text(band.name)
-                    .font(.system(size: 20, weight: .semibold))
+                    .font(.system(size: 22, weight: .semibold))
                     .foregroundColor(.white)
                 
                 Spacer()

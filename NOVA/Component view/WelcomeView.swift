@@ -8,12 +8,12 @@ struct WelcomeView: View {
                 .foregroundColor(.gray)
             
             VStack(spacing: 8) {
-                Text("Welcome")
-                    .font(.system(size: 22, weight: .medium))
-                    .foregroundColor(.white)
+                Text("Welcome to NOVA")
+                    .font(.system(size: 44, weight: .semibold))
+                    .bold()
                 
                 Text("Select a spectrum band to begin")
-                    .font(.system(size: 14))
+                    .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(.gray)
                     .multilineTextAlignment(.center)
             }

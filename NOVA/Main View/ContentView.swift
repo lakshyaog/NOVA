@@ -2,6 +2,40 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var viewModel = SpectrumViewModel()
+    @State private var selectedTab = 0
+    
+    var body: some View {
+        TabView(selection: $selectedTab) {
+            // Main Spectrum View
+            MainSpectrumView(viewModel: viewModel)
+                .tabItem {
+                    Label("Spectrum", systemImage: "wave.3.right")
+                }
+                .tag(0)
+            
+            // AR View
+            ARSpectrumView(selectedBand: viewModel.selectedBand)
+                .tabItem {
+                    Label("AR View", systemImage: "arkit")
+                }
+                .tag(1)
+            
+            // Info View
+            InfoView()
+                .tabItem {
+                    Label("Info", systemImage: "info.circle")
+                }
+                .tag(2)
+        }
+        .onAppear {
+            viewModel.startInitialAnimations()
+        }
+    }
+}
+
+// MARK: - Main Spectrum View
+struct MainSpectrumView: View {
+    @ObservedObject var viewModel: SpectrumViewModel
     
     var body: some View {
         GeometryReader { geometry in
@@ -48,15 +82,6 @@ struct ContentView: View {
             }
         }
         .ignoresSafeArea(.container, edges: .top)
-        .onAppear {
-            viewModel.startInitialAnimations()
-        }
-        .sheet(isPresented: $viewModel.showingInfo) {
-            InfoView()
-        }
-        .fullScreenCover(isPresented: $viewModel.showingARView) {
-            ARSpectrumView(selectedBand: viewModel.selectedBand)
-        }
     }
 }
 

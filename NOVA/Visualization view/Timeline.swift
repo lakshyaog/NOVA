@@ -14,7 +14,7 @@ struct DiscoveryTimeline: View {
     var body: some View {
         VStack(spacing: 12) {
             Text("Discovery Timeline")
-                .font(.system(size: 16, weight: .medium))
+                .font(.system(size: 18, weight: .semibold))
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity, alignment: .leading)
             

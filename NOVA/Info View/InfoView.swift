@@ -12,11 +12,11 @@ struct InfoView: View {
                 ScrollView {
                     VStack(spacing: 20) {
                         Image(systemName: "wave.3.right.circle")
-                            .font(.system(size: 50))
+                            .font(.system(size: 54, weight: .semibold))
                             .foregroundColor(.white)
                         
-                        Text("Electromagnetic Spectrum")
-                            .font(.system(size: 24, weight: .semibold))
+                        Text("About NOVA")
+                            .font(.system(size: 26, weight: .semibold))
                             .foregroundColor(.white)
                             .multilineTextAlignment(.center)
                         
