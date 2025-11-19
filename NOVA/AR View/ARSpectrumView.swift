@@ -20,9 +20,9 @@ struct ARSpectrumView: View {
                         dismiss()
                     } label: {
                         Image(systemName: "xmark")
-                            .font(.system(size: 20, weight: .medium))
+                            .font(.system(size: 22, weight: .semibold))
                             .foregroundColor(.white)
-                            .frame(width: 44, height: 44)
+                            .frame(width: 48, height: 48)
                             .background(Color.black.opacity(0.4))
                             .clipShape(Circle())
                     }
@@ -36,7 +36,7 @@ struct ARSpectrumView: View {
                                 .frame(width: 8, height: 8)
                             
                             Text(band.name)
-                                .font(.system(size: 15, weight: .medium))
+                                .font(.system(size: 17, weight: .semibold))
                                 .foregroundColor(.white)
                         }
                         .padding(.horizontal, 16)
@@ -66,8 +66,8 @@ struct ARSpectrumView: View {
                                 .frame(width: 6, height: 6)
                             
                             Text(arViewModel.isAnimating ? "Wave Active" : "Paused")
-                                .font(.system(size: 12, weight: .medium))
-                                .foregroundColor(.white.opacity(0.8))
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(.white.opacity(0.9))
                         }
                         .padding(.horizontal, 12)
                         .padding(.vertical, 6)
@@ -77,8 +77,8 @@ struct ARSpectrumView: View {
                         )
                     } else {
                         Text("Tap surface to place wave")
-                            .font(.system(size: 13, weight: .medium))
-                            .foregroundColor(.white.opacity(0.9))
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(.white)
                             .padding(.horizontal, 16)
                             .padding(.vertical, 8)
                             .background(
@@ -94,9 +94,9 @@ struct ARSpectrumView: View {
                             arViewModel.clearAllWaves()
                         } label: {
                             Image(systemName: "trash")
-                                .font(.system(size: 18, weight: .medium))
+                                .font(.system(size: 20, weight: .semibold))
                                 .foregroundColor(.white)
-                                .frame(width: 50, height: 50)
+                                .frame(width: 54, height: 54)
                                 .background(Color.red.opacity(0.6))
                                 .clipShape(Circle())
                         }
@@ -108,9 +108,9 @@ struct ARSpectrumView: View {
                             arViewModel.toggleAnimation()
                         } label: {
                             Image(systemName: arViewModel.isAnimating ? "pause.fill" : "play.fill")
-                                .font(.system(size: 18, weight: .medium))
+                                .font(.system(size: 20, weight: .semibold))
                                 .foregroundColor(.white)
-                                .frame(width: 50, height: 50)
+                                .frame(width: 54, height: 54)
                                 .background(
                                     selectedBand?.color.opacity(0.7) ?? Color.blue.opacity(0.7)
                                 )
@@ -135,8 +135,8 @@ struct ARSpectrumView: View {
                             .frame(width: 8, height: 8)
                         
                         Text("Surface detected")
-                            .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(.white.opacity(0.8))
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(.white.opacity(0.9))
                     }
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
