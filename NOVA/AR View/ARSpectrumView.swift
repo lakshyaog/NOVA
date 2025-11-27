@@ -14,46 +14,6 @@ struct ARSpectrumView: View {
                 .ignoresSafeArea()
             
             VStack {
-                // Minimalist top bar
-                HStack {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 22, weight: .semibold))
-                            .foregroundColor(.white)
-                            .frame(width: 48, height: 48)
-                            .background(Color.black.opacity(0.4))
-                            .clipShape(Circle())
-                    }
-                    
-                    Spacer()
-                    
-                    if let band = selectedBand {
-                        HStack(spacing: 8) {
-                            Circle()
-                                .fill(band.color)
-                                .frame(width: 8, height: 8)
-                            
-                            Text(band.name)
-                                .font(.system(size: 17, weight: .semibold))
-                                .foregroundColor(.white)
-                        }
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 10)
-                        .background(
-                            Capsule()
-                                .fill(Color.black.opacity(0.4))
-                                .overlay(
-                                    Capsule()
-                                        .strokeBorder(band.color.opacity(0.3), lineWidth: 1)
-                                )
-                        )
-                    }
-                }
-                .padding(.horizontal, 20)
-                .padding(.top, 16)
-                
                 Spacer()
                 
                 // Bottom controls with refined design
@@ -169,6 +129,8 @@ class ARViewModel: ObservableObject {
     weak var arView: ARView?
     private var waveAnchors: [AnchorEntity] = []
     private var cancellables = Set<AnyCancellable>()
+    private var activeWaveCount = 0
+    private let maxConcurrentWaves = 12  // Limit concurrent waves
     
     func updateBand(_ band: SpectrumBand?) {
         selectedBand = band
@@ -303,34 +265,34 @@ class ARViewModel: ObservableObject {
             return WaveProperties(
                 wavelength: 0.15,
                 amplitude: 0.03,
-                particleCount: 35,
+                particleCount: 22,      // Reduced from 35
                 speed: 2.2,
                 particleSize: 0.007,
                 opacity: 0.8,
-                directionDelay: 0.10,
-                regenerationDelay: 0.6
+                directionDelay: 0.15,   // Increased from 0.10
+                regenerationDelay: 0.9  // Increased from 0.6
             )
         case "X-Rays":
             return WaveProperties(
                 wavelength: 0.1,        // Short wavelength
                 amplitude: 0.02,        // Small amplitude
-                particleCount: 40,      // Many particles
-                speed: 2.0,             // Faster
+                particleCount: 20,      // Reduced from 40
+                speed: 2.0,
                 particleSize: 0.006,    // Smaller particles
                 opacity: 0.85,
-                directionDelay: 0.08,
-                regenerationDelay: 0.5
+                directionDelay: 0.18,   // Increased from 0.08
+                regenerationDelay: 1.0  // Increased from 0.5
             )
         case "Gamma Rays":
             return WaveProperties(
                 wavelength: 0.08,       // Shortest wavelength
                 amplitude: 0.015,       // Smallest amplitude
-                particleCount: 50,      // Most particles (tight wave)
-                speed: 1.8,             // Fastest
+                particleCount: 18,      // Reduced from 50
+                speed: 1.8,
                 particleSize: 0.005,    // Smallest particles
                 opacity: 0.9,
-                directionDelay: 0.05,
-                regenerationDelay: 0.4
+                directionDelay: 0.20,   // Increased from 0.05
+                regenerationDelay: 1.2  // Increased from 0.4
             )
         default:
             return WaveProperties(
@@ -359,13 +321,18 @@ class ARViewModel: ObservableObject {
     
     private func createTravelingWave(on anchor: AnchorEntity, band: SpectrumBand, direction: SIMD3<Float>, delay: TimeInterval, properties: WaveProperties) {
         DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-            guard self.isAnimating else { return }
+            guard self.isAnimating, !self.waveAnchors.isEmpty else { return }
+            
+            // Limit concurrent waves to prevent crashes
+            guard self.activeWaveCount < self.maxConcurrentWaves else { return }
+            
+            self.activeWaveCount += 1
             
             // Create realistic 3D sine wave
             let waveContainer = Entity()
             
             // Reduce particle count for better performance
-            let optimizedCount = min(properties.particleCount, 30)
+            let optimizedCount = min(properties.particleCount, 20)
             
             // Create connected wave path
             for i in 0..<optimizedCount {
@@ -398,8 +365,8 @@ class ARViewModel: ObservableObject {
                 
                 waveContainer.addChild(particle)
                 
-                // Reduce trail particles for performance - only every 3rd particle
-                if i > 5 && i < optimizedCount - 5 && i % 3 == 0 {
+                // Reduce trail particles for performance - only every 4th particle
+                if i > 5 && i < optimizedCount - 5 && i % 4 == 0 {
                     let trail = ModelEntity(
                         mesh: .generateSphere(radius: properties.particleSize * 1.5),
                         materials: [self.createTrailMaterial(for: band)]
@@ -429,6 +396,7 @@ class ARViewModel: ObservableObject {
             // Fade out naturally - simplified for performance
             DispatchQueue.main.asyncAfter(deadline: .now() + properties.speed * 0.9) {
                 waveContainer.removeFromParent()
+                self.activeWaveCount -= 1
             }
             
             // Continue generating waves with band-specific timing
@@ -483,14 +451,17 @@ class ARViewModel: ObservableObject {
         // Stop animations
         isAnimating = false
         
+        // Remove all anchors and their children
         for anchor in waveAnchors {
+            anchor.children.forEach { $0.removeFromParent() }
             arView.scene.removeAnchor(anchor)
         }
         waveAnchors.removeAll()
         hasPlacedWave = false
+        activeWaveCount = 0
         
-        // Restart animations
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+        // Restart animations after cleanup
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
             self.isAnimating = true
         }
         
