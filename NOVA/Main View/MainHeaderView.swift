@@ -8,11 +8,11 @@ struct MainHeaderView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text("EM Spectrum")
-                .font(.system(size: 28, weight: .semibold))
+                .font(.system(size: 30, weight: .semibold))
                 .foregroundColor(.white)
             
             Text("Explore the Electromagnetic Spectrum")
-                .font(.system(size: 15, weight: .semibold))
+                .font(.system(size: 14, weight: .medium))
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
