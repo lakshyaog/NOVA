@@ -1,8 +1,6 @@
 import SwiftUI
 
 struct InfoView: View {
-    @Environment(\.dismiss) private var dismiss
-    
     var body: some View {
         NavigationView {
             ZStack {
@@ -53,14 +51,6 @@ struct InfoView: View {
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Close") {
-                        dismiss()
-                    }
-                    .foregroundColor(.white)
-                }
-            }
         }
     }
 }

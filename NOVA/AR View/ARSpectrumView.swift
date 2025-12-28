@@ -5,7 +5,6 @@ import Combine
 
 struct ARSpectrumView: View {
     let selectedBand: SpectrumBand?
-    @Environment(\.dismiss) private var dismiss
     @StateObject private var arViewModel = ARViewModel()
     
     var body: some View {
