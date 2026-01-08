@@ -6,6 +6,7 @@ import Combine
 struct ARSpectrumView: View {
     let selectedBand: SpectrumBand?
     @StateObject private var arViewModel = ARViewModel()
+    @State private var showLegend = true
     
     var body: some View {
         ZStack {
@@ -13,6 +14,12 @@ struct ARSpectrumView: View {
                 .ignoresSafeArea()
             
             VStack {
+                // Top info bar with legend
+                if showLegend && arViewModel.hasPlacedWave {
+                    waveLegendView
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                }
+                
                 Spacer()
                 
                 // Bottom controls with refined design
@@ -77,6 +84,21 @@ struct ARSpectrumView: View {
                         }
                         .opacity(arViewModel.hasPlacedWave ? 1 : 0.3)
                         .disabled(!arViewModel.hasPlacedWave)
+                        
+                        // Legend toggle button
+                        Button {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                showLegend.toggle()
+                            }
+                        } label: {
+                            Image(systemName: showLegend ? "info.circle.fill" : "info.circle")
+                                .font(.system(size: 20, weight: .semibold))
+                                .foregroundColor(.white)
+                                .frame(width: 54, height: 54)
+                                .background(Color.blue.opacity(0.6))
+                                .clipShape(Circle())
+                        }
+                        .opacity(arViewModel.hasPlacedWave ? 1 : 0.3)
                     }
                 }
                 .padding(.bottom, 40)
@@ -114,6 +136,96 @@ struct ARSpectrumView: View {
         .onChange(of: selectedBand) { _, newBand in
             arViewModel.updateBand(newBand)
         }
+    }
+    
+    // MARK: - Wave Legend View
+    private var waveLegendView: some View {
+        VStack(spacing: 12) {
+            // Title
+            Text("Electromagnetic Wave")
+                .font(.system(size: 16, weight: .bold))
+                .foregroundColor(.white)
+            
+            HStack(spacing: 20) {
+                // Electric Field indicator
+                HStack(spacing: 6) {
+                    Circle()
+                        .fill(selectedBand?.color ?? .red)
+                        .frame(width: 12, height: 12)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("E Field")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(.white)
+                        Text("Electric")
+                            .font(.system(size: 10))
+                            .foregroundColor(.white.opacity(0.7))
+                    }
+                }
+                
+                // Magnetic Field indicator
+                HStack(spacing: 6) {
+                    Circle()
+                        .fill(magneticFieldColor)
+                        .frame(width: 12, height: 12)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("B Field")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(.white)
+                        Text("Magnetic")
+                            .font(.system(size: 10))
+                            .foregroundColor(.white.opacity(0.7))
+                    }
+                }
+                
+                // Propagation indicator
+                HStack(spacing: 6) {
+                    Image(systemName: "arrow.right")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(.white.opacity(0.6))
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Direction")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(.white)
+                        Text("Propagation")
+                            .font(.system(size: 10))
+                            .foregroundColor(.white.opacity(0.7))
+                    }
+                }
+            }
+            
+            // Wave info
+            if let band = selectedBand {
+                Text("λ = \(band.wavelength) • f = \(band.frequency)")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(.white.opacity(0.8))
+            }
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.black.opacity(0.7))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(selectedBand?.color.opacity(0.3) ?? Color.white.opacity(0.2), lineWidth: 1)
+                )
+        )
+        .padding(.horizontal, 20)
+        .padding(.top, 60)
+    }
+    
+    private var magneticFieldColor: Color {
+        guard let band = selectedBand else { return .cyan }
+        // Shift the color towards cyan/blue for magnetic field
+        return Color(UIColor { _ in
+            let uiColor = UIColor(band.color)
+            var hue: CGFloat = 0
+            var saturation: CGFloat = 0
+            var brightness: CGFloat = 0
+            var alpha: CGFloat = 0
+            uiColor.getHue(&hue, saturation: &saturation, brightness: &brightness, alpha: &alpha)
+            let newHue = (hue + 0.3).truncatingRemainder(dividingBy: 1.0)
+            return UIColor(hue: newHue, saturation: saturation * 0.8, brightness: brightness, alpha: alpha)
+        })
     }
 }
 
@@ -327,53 +439,16 @@ class ARViewModel: ObservableObject {
             
             self.activeWaveCount += 1
             
-            // Create realistic 3D sine wave
+            // Create realistic 3D electromagnetic wave
             let waveContainer = Entity()
             
-            // Reduce particle count for better performance
-            let optimizedCount = min(properties.particleCount, 20)
-            
-            // Create connected wave path
-            for i in 0..<optimizedCount {
-                let particle = ModelEntity(
-                    mesh: .generateSphere(radius: properties.particleSize),
-                    materials: [self.createWaveMaterial(for: band, opacity: properties.opacity)]
-                )
-                
-                // Position along the wave direction
-                let t = Float(i) / Float(optimizedCount)
-                let distance = t * 2.0  // Extended wave length for visibility
-                
-                // Calculate 3D sine wave position
-                let angle = (distance / properties.wavelength) * 2 * .pi
-                let verticalOffset = sin(angle) * properties.amplitude
-                
-                // Add perpendicular oscillation for 3D effect
-                let perpendicularAngle = angle + .pi / 2
-                let sideOffset = cos(perpendicularAngle) * (properties.amplitude * 0.5)
-                
-                // Calculate perpendicular direction (cross product with up vector)
-                let perpDir = normalize(cross(direction, SIMD3<Float>(0, 1, 0)))
-                
-                // Set 3D position
-                particle.position = SIMD3(
-                    direction.x * distance + perpDir.x * sideOffset,
-                    verticalOffset,
-                    direction.z * distance + perpDir.z * sideOffset
-                )
-                
-                waveContainer.addChild(particle)
-                
-                // Reduce trail particles for performance - only every 4th particle
-                if i > 5 && i < optimizedCount - 5 && i % 4 == 0 {
-                    let trail = ModelEntity(
-                        mesh: .generateSphere(radius: properties.particleSize * 1.5),
-                        materials: [self.createTrailMaterial(for: band)]
-                    )
-                    trail.position = particle.position
-                    waveContainer.addChild(trail)
-                }
-            }
+            // Create proper EM wave with Electric (E) and Magnetic (B) field components
+            self.createElectromagneticWave(
+                container: waveContainer,
+                band: band,
+                direction: direction,
+                properties: properties
+            )
             
             anchor.addChild(waveContainer)
             
@@ -392,7 +467,7 @@ class ARViewModel: ObservableObject {
                 timingFunction: .linear
             )
             
-            // Fade out naturally - simplified for performance
+            // Fade out naturally
             DispatchQueue.main.asyncAfter(deadline: .now() + properties.speed * 0.9) {
                 waveContainer.removeFromParent()
                 self.activeWaveCount -= 1
@@ -403,6 +478,263 @@ class ARViewModel: ObservableObject {
                 self.createTravelingWave(on: anchor, band: band, direction: direction, delay: properties.regenerationDelay, properties: properties)
             }
         }
+    }
+    
+    // MARK: - Realistic Electromagnetic Wave Creation
+    private func createElectromagneticWave(container: Entity, band: SpectrumBand, direction: SIMD3<Float>, properties: WaveProperties) {
+        let segmentCount = min(properties.particleCount, 24)
+        let waveLength: Float = 1.8  // Total wave length in meters
+        
+        // Calculate perpendicular axes for E and B fields
+        // E-field oscillates vertically (Y-axis)
+        // B-field oscillates horizontally (perpendicular to both direction and E)
+        let upVector = SIMD3<Float>(0, 1, 0)
+        let bFieldDirection = normalize(cross(direction, upVector))
+        
+        // Create the central propagation axis (direction of travel)
+        createPropagationAxis(container: container, direction: direction, length: waveLength, band: band, properties: properties)
+        
+        // Create Electric Field (E) - Vertical sinusoidal oscillation
+        createFieldWave(
+            container: container,
+            direction: direction,
+            oscillationAxis: upVector,
+            segmentCount: segmentCount,
+            waveLength: waveLength,
+            amplitude: properties.amplitude,
+            band: band,
+            properties: properties,
+            isElectricField: true,
+            phaseOffset: 0
+        )
+        
+        // Create Magnetic Field (B) - Horizontal sinusoidal oscillation (90° out of phase spatially)
+        createFieldWave(
+            container: container,
+            direction: direction,
+            oscillationAxis: bFieldDirection,
+            segmentCount: segmentCount,
+            waveLength: waveLength,
+            amplitude: properties.amplitude * 0.8,
+            band: band,
+            properties: properties,
+            isElectricField: false,
+            phaseOffset: 0
+        )
+        
+        // Add wave source glow at origin
+        let sourceGlow = ModelEntity(
+            mesh: .generateSphere(radius: properties.particleSize * 2),
+            materials: [createGlowMaterial(for: band)]
+        )
+        container.addChild(sourceGlow)
+    }
+    
+    private func createPropagationAxis(container: Entity, direction: SIMD3<Float>, length: Float, band: SpectrumBand, properties: WaveProperties) {
+        // Create dotted line showing direction of propagation
+        let dotCount = 12
+        let spacing = length / Float(dotCount)
+        
+        for i in 0..<dotCount {
+            let dot = ModelEntity(
+                mesh: .generateSphere(radius: properties.particleSize * 0.4),
+                materials: [createAxisMaterial(for: band)]
+            )
+            let distance = Float(i) * spacing
+            dot.position = SIMD3(
+                direction.x * distance,
+                0,
+                direction.z * distance
+            )
+            container.addChild(dot)
+        }
+    }
+    
+    private func createFieldWave(
+        container: Entity,
+        direction: SIMD3<Float>,
+        oscillationAxis: SIMD3<Float>,
+        segmentCount: Int,
+        waveLength: Float,
+        amplitude: Float,
+        band: SpectrumBand,
+        properties: WaveProperties,
+        isElectricField: Bool,
+        phaseOffset: Float
+    ) {
+        // Create smooth sinusoidal wave using connected spheres
+        var previousPosition: SIMD3<Float>? = nil
+        
+        for i in 0..<segmentCount {
+            let t = Float(i) / Float(segmentCount - 1)
+            let distance = t * waveLength
+            
+            // Calculate sine wave position
+            let phase = (distance / properties.wavelength) * 2 * .pi + phaseOffset
+            let oscillation = sin(phase) * amplitude
+            
+            // Position along propagation direction + oscillation
+            let position = SIMD3(
+                direction.x * distance + oscillationAxis.x * oscillation,
+                oscillationAxis.y * oscillation,
+                direction.z * distance + oscillationAxis.z * oscillation
+            )
+            
+            // Create wave particle
+            let particleSize = properties.particleSize * (isElectricField ? 1.0 : 0.8)
+            let particle = ModelEntity(
+                mesh: .generateSphere(radius: particleSize),
+                materials: [isElectricField ? 
+                    createElectricFieldMaterial(for: band, opacity: properties.opacity) :
+                    createMagneticFieldMaterial(for: band, opacity: properties.opacity * 0.7)]
+            )
+            particle.position = position
+            container.addChild(particle)
+            
+            // Create connecting line segments between particles for smooth wave appearance
+            if let prevPos = previousPosition, i % 2 == 0 {
+                createWaveSegment(
+                    container: container,
+                    from: prevPos,
+                    to: position,
+                    band: band,
+                    isElectricField: isElectricField,
+                    properties: properties
+                )
+            }
+            
+            // Add field lines (arrows) at peaks and troughs to show field direction
+            if i > 0 && i < segmentCount - 1 && i % 4 == 0 {
+                let fieldStrength = abs(sin(phase))
+                if fieldStrength > 0.7 {
+                    createFieldArrow(
+                        container: container,
+                        position: SIMD3(direction.x * distance, 0, direction.z * distance),
+                        direction: oscillationAxis * (sin(phase) > 0 ? 1 : -1),
+                        length: amplitude * 0.6,
+                        band: band,
+                        isElectricField: isElectricField,
+                        properties: properties
+                    )
+                }
+            }
+            
+            previousPosition = position
+        }
+        
+        // Add field label at the end
+        addFieldLabel(
+            container: container,
+            position: SIMD3(
+                direction.x * waveLength * 0.5,
+                isElectricField ? amplitude * 1.5 : 0,
+                direction.z * waveLength * 0.5 + (isElectricField ? 0 : amplitude * 1.5)
+            ),
+            isElectricField: isElectricField,
+            band: band,
+            properties: properties
+        )
+    }
+    
+    private func createWaveSegment(container: Entity, from: SIMD3<Float>, to: SIMD3<Float>, band: SpectrumBand, isElectricField: Bool, properties: WaveProperties) {
+        let midpoint = (from + to) / 2
+        let length = simd_length(to - from)
+        
+        guard length > 0.001 else { return }
+        
+        let segment = ModelEntity(
+            mesh: .generateBox(size: SIMD3(properties.particleSize * 0.5, properties.particleSize * 0.5, length)),
+            materials: [isElectricField ?
+                createElectricFieldMaterial(for: band, opacity: properties.opacity * 0.6) :
+                createMagneticFieldMaterial(for: band, opacity: properties.opacity * 0.4)]
+        )
+        
+        segment.position = midpoint
+        
+        // Orient segment to point from 'from' to 'to'
+        let direction = normalize(to - from)
+        segment.look(at: to, from: midpoint, relativeTo: nil)
+        
+        container.addChild(segment)
+    }
+    
+    private func createFieldArrow(container: Entity, position: SIMD3<Float>, direction: SIMD3<Float>, length: Float, band: SpectrumBand, isElectricField: Bool, properties: WaveProperties) {
+        // Arrow shaft
+        let shaft = ModelEntity(
+            mesh: .generateBox(size: SIMD3(properties.particleSize * 0.3, length * 0.8, properties.particleSize * 0.3)),
+            materials: [isElectricField ?
+                createElectricFieldMaterial(for: band, opacity: properties.opacity * 0.5) :
+                createMagneticFieldMaterial(for: band, opacity: properties.opacity * 0.4)]
+        )
+        
+        shaft.position = position + direction * (length * 0.4)
+        container.addChild(shaft)
+        
+        // Arrow head (cone approximated with small sphere)
+        let head = ModelEntity(
+            mesh: .generateSphere(radius: properties.particleSize * 0.8),
+            materials: [isElectricField ?
+                createElectricFieldMaterial(for: band, opacity: properties.opacity * 0.8) :
+                createMagneticFieldMaterial(for: band, opacity: properties.opacity * 0.6)]
+        )
+        head.position = position + direction * length * 0.8
+        container.addChild(head)
+    }
+    
+    private func addFieldLabel(container: Entity, position: SIMD3<Float>, isElectricField: Bool, band: SpectrumBand, properties: WaveProperties) {
+        // Create a small indicator sphere to mark E or B field
+        let indicator = ModelEntity(
+            mesh: .generateSphere(radius: properties.particleSize * 1.2),
+            materials: [isElectricField ?
+                createElectricFieldMaterial(for: band, opacity: 0.9) :
+                createMagneticFieldMaterial(for: band, opacity: 0.7)]
+        )
+        indicator.position = position
+        container.addChild(indicator)
+    }
+    
+    // MARK: - Materials
+    private func createElectricFieldMaterial(for band: SpectrumBand, opacity: Double) -> SimpleMaterial {
+        var material = SimpleMaterial()
+        // Electric field uses the band's primary color
+        material.color = .init(tint: UIColor(band.color.opacity(opacity)))
+        material.roughness = .float(0.05)
+        material.metallic = .float(0.9)
+        return material
+    }
+    
+    private func createMagneticFieldMaterial(for band: SpectrumBand, opacity: Double) -> SimpleMaterial {
+        var material = SimpleMaterial()
+        // Magnetic field uses a complementary/shifted color (more blue-ish)
+        let magneticColor = shiftColorForMagneticField(band.color)
+        material.color = .init(tint: UIColor(magneticColor.opacity(opacity)))
+        material.roughness = .float(0.1)
+        material.metallic = .float(0.7)
+        return material
+    }
+    
+    private func createAxisMaterial(for band: SpectrumBand) -> SimpleMaterial {
+        var material = SimpleMaterial()
+        material.color = .init(tint: UIColor(Color.white.opacity(0.3)))
+        material.roughness = .float(0.5)
+        material.metallic = .float(0.2)
+        return material
+    }
+    
+    private func shiftColorForMagneticField(_ color: Color) -> Color {
+        // Shift the color towards cyan/blue for magnetic field visualization
+        let uiColor = UIColor(color)
+        var hue: CGFloat = 0
+        var saturation: CGFloat = 0
+        var brightness: CGFloat = 0
+        var alpha: CGFloat = 0
+        
+        uiColor.getHue(&hue, saturation: &saturation, brightness: &brightness, alpha: &alpha)
+        
+        // Shift hue towards blue (0.6 in HSB)
+        let newHue = (hue + 0.3).truncatingRemainder(dividingBy: 1.0)
+        
+        return Color(UIColor(hue: newHue, saturation: saturation * 0.8, brightness: brightness, alpha: alpha))
     }
     
     private func createGlowMaterial(for band: SpectrumBand) -> SimpleMaterial {
