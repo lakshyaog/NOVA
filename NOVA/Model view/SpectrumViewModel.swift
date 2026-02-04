@@ -18,16 +18,18 @@ class SpectrumViewModel: ObservableObject {
         // Immediate haptic feedback
         HapticFeedback.light()
         
-        // Instant state update - no animations to interfere
-        if selectedBand == band {
-            selectedBand = nil
-        } else {
-            selectedBand = band
+        // Use Task to update state immediately on main actor, avoiding "Publishing changes" error
+        Task { @MainActor in
+            if selectedBand == band {
+                selectedBand = nil
+            } else {
+                selectedBand = band
+            }
         }
     }
     
     func toggleInfo() {
-        HapticFeedback.light()
+        HapticFeedback.light() 
         showingInfo.toggle()
     }
     

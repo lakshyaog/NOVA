@@ -71,21 +71,31 @@ struct DetailView: View {
     private func handleExampleTap(_ example: String) {
         HapticFeedback.medium()
         
+        // First, find the example detail
+        guard let detail = ExampleDetail.detail(for: example, bandName: band.name) else {
+            return
+        }
+        
         // Animate button tap
         withAnimation(.spring(response: 0.2, dampingFraction: 0.6)) {
             tappedExample = example
         }
         
-        // Reset and show mini-game
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+        // Set the example FIRST, then show the sheet after a brief delay
+        Task { @MainActor in
+            // Set the selected example immediately
+            selectedExample = detail
+            
+            // Brief delay for tap animation
+            try? await Task.sleep(nanoseconds: 150_000_000) // 0.15 seconds
+            
+            // Reset tap animation
             withAnimation(.spring(response: 0.2, dampingFraction: 0.6)) {
                 tappedExample = nil
             }
             
-            if let detail = ExampleDetail.detail(for: example, bandName: band.name) {
-                selectedExample = detail
-                showMiniGame = true
-            }
+            // Now show the sheet - selectedExample is already set
+            showMiniGame = true
         }
     }
 }

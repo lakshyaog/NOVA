@@ -101,10 +101,12 @@ struct SpectrumBandsScrollView: View {
                         isSelected: selectedBand == band,
                         glowIntensity: glowIntensity
                     )
-                    .onTapGesture {
-                        HapticFeedback.light()
-                        onBandTap(band)
-                    }
+                    .simultaneousGesture(
+                        TapGesture()
+                            .onEnded { _ in
+                                onBandTap(band)
+                            }
+                    )
                 }
             }
             .padding(.horizontal, 20)
@@ -119,6 +121,7 @@ struct DetailOrWelcomeView: View {
         Group {
             if let band = selectedBand {
                 DetailView(band: band)
+                    .id(band.id) // Force view recreation when band changes
                     .transition(.asymmetric(
                         insertion: .move(edge: .bottom).combined(with: .opacity),
                         removal: .opacity.combined(with: .scale(scale: 0.9))
@@ -128,6 +131,7 @@ struct DetailOrWelcomeView: View {
                     .transition(.opacity)
             }
         }
+        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: selectedBand?.id)
     }
 }
 
