@@ -22,7 +22,7 @@ struct SpectrumBandView: View {
         }
         .frame(minWidth: 80, minHeight: 100)
         .contentShape(Rectangle())
-        .animation(.easeInOut(duration: 0.2), value: isSelected)
+        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isSelected)
     }
 }
 

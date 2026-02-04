@@ -114,6 +114,26 @@ extension ExampleDetail {
             correctAnswerIndex: 1,
             spectrumBandName: "Microwaves"
         ),
+        ExampleDetail(
+            name: "WiFi",
+            icon: "wifi",
+            description: "WiFi uses microwave frequencies at 2.4 GHz or 5 GHz to connect devices wirelessly to the internet. These are in the microwave portion of the spectrum.",
+            funFact: "WiFi routers emit microwaves similar to microwave ovens, but at much lower power levels!",
+            quizQuestion: "What frequencies does WiFi typically use?",
+            quizOptions: ["1 GHz and 3 GHz", "2.4 GHz and 5 GHz", "10 GHz and 20 GHz", "100 MHz and 200 MHz"],
+            correctAnswerIndex: 1,
+            spectrumBandName: "Microwaves"
+        ),
+        ExampleDetail(
+            name: "Bluetooth",
+            icon: "wave.3.right.circle.fill",
+            description: "Bluetooth operates at 2.4 GHz in the microwave spectrum, using short-range microwaves to connect devices wirelessly.",
+            funFact: "Bluetooth and WiFi both use 2.4 GHz microwaves, which is why they can sometimes interfere with each other!",
+            quizQuestion: "Bluetooth operates at what frequency?",
+            quizOptions: ["900 MHz", "2.4 GHz", "5 GHz", "10 GHz"],
+            correctAnswerIndex: 1,
+            spectrumBandName: "Microwaves"
+        ),
         
         // MARK: - Infrared Examples
         ExampleDetail(
